@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+{% block title %}Courses | Maritime Enrollment{% endblock %}
+{% block content %}
+<section class="hero">
+  <div>
+    <p class="eyebrow">Maritime Training</p>
+    <h1>Enroll in STCW-aligned shipboard safety courses.</h1>
+    <p class="lede">Browse course schedules, reserve your slot, pay online, and receive certificates once training is complete.</p>
+  </div>
+  <section class="hero-card login-card">
+    <p class="eyebrow">Member Access</p>
+    <h2>Sign in to manage enrollment, training, and payments.</h2>
+    <form method="post" action="{{ url_for('login') }}" class="form-grid">
+      <label>Email<input type="email" name="email" required></label>
+      <label>Password<input type="password" name="password" required></label>
+      <button type="submit">Login</button>
+    </form>
+    <p class="muted">New trainee? <a href="{{ url_for('register') }}">Create an account</a>.</p>
+  </section>
+</section>
+
+<section class="card-grid" id="courses">
+  {% for course in courses %}
+    <article class="card">
+      <p class="eyebrow">{{ course['code'] }}</p>
+      <h2>{{ course['title'] }}</h2>
+      <p>{{ course['description'] }}</p>
+      <div class="meta-row">
+        <span>${{ '%.2f'|format(course['price_cents'] / 100) }}</span>
+        <span>{{ course['duration_days'] }} days</span>
+      </div>
+      <div class="meta-row">
+        <span>Next batch: {{ course['next_start'] or 'TBA' }}</span>
+        <span>{{ course['open_batches'] }} open</span>
+      </div>
+      <a class="button-link" href="{{ url_for('course_detail', course_id=course['id']) }}">View schedule</a>
+    </article>
+  {% endfor %}
+</section>
+{% endblock %}

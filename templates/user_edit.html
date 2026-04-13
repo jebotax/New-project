@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+{% block title %}Edit User{% endblock %}
+{% block content %}
+<section class="form-card narrow">
+  <div class="section-head">
+    <div>
+      <p class="eyebrow">User update</p>
+      <h1>Edit {{ user['full_name'] }}</h1>
+    </div>
+    <a href="{{ url_for('manage_users') }}">Back to users</a>
+  </div>
+  <form method="post" class="form-grid">
+    <label>Full name<input type="text" name="full_name" value="{{ user['full_name'] }}" required></label>
+    <label>Email<input type="email" name="email" value="{{ user['email'] }}" required></label>
+    <label>Phone<input type="text" name="phone" value="{{ user['phone'] or '' }}"></label>
+    <label>Role
+      <select name="role">
+        <option value="client" {% if user['role'] == 'client' %}selected{% endif %}>Client</option>
+        <option value="staff" {% if user['role'] == 'staff' %}selected{% endif %}>Staff</option>
+        <option value="admin" {% if user['role'] == 'admin' %}selected{% endif %}>Admin</option>
+        <option value="cashier" {% if user['role'] == 'cashier' %}selected{% endif %}>Cashier</option>
+      </select>
+    </label>
+    <label>Status
+      <select name="active">
+        <option value="1" {% if user['active'] %}selected{% endif %}>Active</option>
+        <option value="0" {% if not user['active'] %}selected{% endif %}>Inactive</option>
+      </select>
+    </label>
+    <label>New password<input type="password" name="password" placeholder="Leave blank to keep current password"></label>
+    <div class="button-row">
+      <button type="submit">Save user</button>
+    </div>
+  </form>
+  {% if user['id'] != g.user['id'] %}
+    <form method="post" action="{{ url_for('delete_user', user_id=user['id']) }}">
+      <button type="submit" class="danger">Delete user</button>
+    </form>
+  {% endif %}
+</section>
+{% endblock %}

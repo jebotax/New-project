@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="theme-color" content="#0d3b66">
+    <title>{% block title %}Enrollment App{% endblock %}</title>
+    <link rel="manifest" href="{{ url_for('manifest') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+  </head>
+  <body>
+    <header class="site-header">
+      <a class="brand" href="{{ target_dashboard(g.user['role']) if g.user else url_for('home') }}">Maritime Enrollment</a>
+      <nav class="nav">
+        {% if g.user %}
+          {% if g.user['role'] == 'client' %}
+            <a href="{{ url_for('client_classes') }}">Browse Classes</a>
+            <a href="{{ url_for('client_dashboard') }}">My Enrollments</a>
+          {% elif g.user['role'] == 'cashier' %}
+            <a href="{{ url_for('cashier_dashboard') }}">Dashboard</a>
+          {% else %}
+            <a href="{{ url_for('staff_dashboard') }}">Dashboard</a>
+            <a href="{{ url_for('staff_enrollments') }}">Enrollments</a>
+            <a href="{{ url_for('manage_courses') }}">Manage Courses</a>
+          {% endif %}
+          <a href="{{ url_for('logout') }}">Logout</a>
+        {% else %}
+          <a href="{{ url_for('home') }}">Welcome</a>
+          <a class="button-link" href="{{ url_for('register') }}">Enroll Now</a>
+        {% endif %}
+      </nav>
+    </header>
+
+    <main class="page-shell">
+      {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+          <section class="flash-stack">
+            {% for category, message in messages %}
+              <div class="flash flash-{{ category }}">{{ message }}</div>
+            {% endfor %}
+          </section>
+        {% endif %}
+      {% endwith %}
+      {% block content %}{% endblock %}
+    </main>
+
+    <footer class="site-footer">
+      <p>Maritime Enrollment Platform &copy; {{ current_year }}</p>
+    </footer>
+    <script src="{{ url_for('static', filename='app.js') }}"></script>
+  </body>
+</html>

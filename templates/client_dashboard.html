@@ -1,0 +1,68 @@
+{% extends "base.html" %}
+{% block title %}My Enrollments{% endblock %}
+{% block content %}
+<section class="section-head">
+  <div>
+    <p class="eyebrow">Client portal</p>
+    <h1>My enrollments</h1>
+  </div>
+</section>
+<section class="table-card">
+  <table>
+    <thead>
+      <tr>
+        <th>Course</th>
+        <th>Batch</th>
+        <th>Dates</th>
+        <th>Status</th>
+        <th>Payment</th>
+        <th>Method</th>
+        <th>Attendance</th>
+        <th>Certificate</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for row in enrollments %}
+      <tr>
+        <td>{{ row['course_title'] }}</td>
+        <td>{{ row['batch_code'] }}</td>
+        <td>{{ row['start_date'] }} to {{ row['end_date'] }}</td>
+        <td>{{ row['status'] }}</td>
+        <td>{{ row['payment_state'] or row['payment_status'] }}</td>
+        <td>{{ row['payment_method']|upper if row['payment_method'] else 'GCASH' }}</td>
+        <td>
+          {% set summary = attendance.get(row['id']) %}
+          {% if summary and summary['total_sessions'] %}
+            {{ summary['present_sessions'] }}/{{ summary['total_sessions'] }}
+          {% else %}
+            <span class="muted">Not started</span>
+          {% endif %}
+        </td>
+        <td>
+          {% if row['certificate_number'] %}
+            <a href="{{ url_for('download_certificate', enrollment_id=row['id']) }}">{{ row['certificate_number'] }}</a>
+          {% elif row['certificate_eligible'] %}
+            <span class="muted">Processing</span>
+          {% else %}
+            <span class="muted">Pending</span>
+          {% endif %}
+        </td>
+        <td>
+          <div class="stack-actions">
+            {% if row['payment_status'] != 'paid' %}
+              <a href="{{ url_for('edit_client_enrollment', enrollment_id=row['id']) }}">Update enrollment</a>
+            {% endif %}
+            {% if row['payment_status'] == 'paid' %}
+              <a href="{{ url_for('client_attendance', enrollment_id=row['id']) }}">Attendance</a>
+            {% endif %}
+          </div>
+        </td>
+      </tr>
+      {% else %}
+      <tr><td colspan="9">No enrollments yet.</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</section>
+{% endblock %}

@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+{% block title %}Checkout{% endblock %}
+{% block content %}
+<section class="detail-header">
+  <div>
+    <p class="eyebrow">Payment</p>
+    <h1>Confirm payment</h1>
+    <p>{{ enrollment['course_title'] }} | {{ enrollment['batch_code'] }}</p>
+    <p>{{ enrollment['start_date'] }} to {{ enrollment['end_date'] }}</p>
+  </div>
+  <div class="summary-card">
+    <p><strong>Reference:</strong> {{ enrollment['provider_reference'] }}</p>
+    <p><strong>Method:</strong> {{ enrollment['payment_method']|upper if enrollment['payment_method'] else 'Not selected' }}</p>
+    <p><strong>Amount:</strong> ${{ '%.2f'|format(enrollment['amount_cents'] / 100) }}</p>
+  </div>
+</section>
+
+<section class="form-card narrow">
+  <p>Select `GCash` for immediate in-app confirmation, or `Over the Counter` to wait for cashier approval.</p>
+  <form method="post" class="button-row">
+    <button type="submit" name="action" value="gcash">Pay with GCash</button>
+    <button type="submit" name="action" value="otc" class="secondary">Mark as Over the Counter</button>
+    <button type="submit" name="action" value="fail" class="secondary">Simulate failure</button>
+  </form>
+</section>
+{% endblock %}

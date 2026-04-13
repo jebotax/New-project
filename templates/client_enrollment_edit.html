@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+{% block title %}Update Enrollment{% endblock %}
+{% block content %}
+<section class="form-card narrow">
+  <div class="section-head">
+    <div>
+      <p class="eyebrow">Enrollment update</p>
+      <h1>Edit {{ enrollment['course_title'] }} enrollment</h1>
+      <p>{{ enrollment['batch_code'] }} | Payment: {{ enrollment['payment_state'] or enrollment['payment_status'] }}</p>
+    </div>
+    <a href="{{ url_for('client_dashboard') }}">Back to dashboard</a>
+  </div>
+  <form method="post" class="form-grid">
+    <label>Emergency contact name<input type="text" name="emergency_contact_name" value="{{ enrollment['emergency_contact_name'] }}" required></label>
+    <label>Emergency contact phone<input type="text" name="emergency_contact_phone" value="{{ enrollment['emergency_contact_phone'] }}" required></label>
+    <label>Notes<textarea name="notes" rows="5">{{ enrollment['notes'] or '' }}</textarea></label>
+    <div class="button-row">
+      <button type="submit" name="action" value="save">Save updates</button>
+      <button type="submit" name="action" value="retry" class="secondary">Save and retry payment</button>
+    </div>
+  </form>
+</section>
+{% endblock %}

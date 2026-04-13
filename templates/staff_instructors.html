@@ -1,0 +1,85 @@
+{% extends "base.html" %}
+{% block title %}Instructors{% endblock %}
+{% block content %}
+<section class="split-grid">
+  <article class="form-card">
+    <h1>Add instructor</h1>
+    <form method="post" class="form-grid">
+      <label>Full name<input type="text" name="full_name" required></label>
+      <label>Email<input type="email" name="email" required></label>
+      <label>Qualifications<textarea name="qualifications" rows="4" required></textarea></label>
+      <button type="submit">Save instructor</button>
+    </form>
+    <hr>
+    <h2>Assign instructor</h2>
+    <form method="post" action="{{ url_for('create_assignment') }}" class="form-grid">
+      <label>Instructor
+        <select name="instructor_id" required>
+          {% for instructor in instructors %}
+            <option value="{{ instructor['id'] }}">{{ instructor['full_name'] }}</option>
+          {% endfor %}
+        </select>
+      </label>
+      <label>Class batch
+        <select name="class_batch_id" required>
+          {% for batch in batches %}
+            <option value="{{ batch['id'] }}">{{ batch['course_title'] }} - {{ batch['batch_code'] }}</option>
+          {% endfor %}
+        </select>
+      </label>
+      <label>Role
+        <select name="role">
+          <option value="lead">Lead</option>
+          <option value="support">Support</option>
+        </select>
+      </label>
+      <button type="submit">Assign</button>
+    </form>
+  </article>
+  <article class="table-card">
+    <h2>Instructor roster</h2>
+    <table>
+      <thead><tr><th>Name</th><th>Email</th><th>Status</th><th>Actions</th></tr></thead>
+      <tbody>
+      {% for instructor in instructors %}
+        <tr>
+          <td>{{ instructor['full_name'] }}</td>
+          <td>{{ instructor['email'] }}</td>
+          <td>{{ 'Active' if instructor['is_active'] else 'Inactive' }}</td>
+          <td>
+            <div class="stack-actions">
+              <a class="button-link" href="{{ url_for('edit_instructor', instructor_id=instructor['id']) }}">Edit</a>
+              <form method="post" action="{{ url_for('delete_instructor', instructor_id=instructor['id']) }}">
+                <button type="submit" class="danger">Delete</button>
+              </form>
+            </div>
+          </td>
+        </tr>
+      {% endfor %}
+      </tbody>
+    </table>
+    <h2>Assignments</h2>
+    <table>
+      <thead><tr><th>Instructor</th><th>Course</th><th>Batch</th><th>Role</th><th>Actions</th></tr></thead>
+      <tbody>
+      {% for assignment in assignments %}
+        <tr>
+          <td>{{ assignment['full_name'] }}</td>
+          <td>{{ assignment['course_title'] }}</td>
+          <td>{{ assignment['batch_code'] }}</td>
+          <td>{{ assignment['role'] }}</td>
+          <td>
+            <div class="stack-actions">
+              <a class="button-link" href="{{ url_for('edit_assignment', assignment_id=assignment['id']) }}">Edit</a>
+              <form method="post" action="{{ url_for('delete_assignment', assignment_id=assignment['id']) }}">
+                <button type="submit" class="danger">Delete</button>
+              </form>
+            </div>
+          </td>
+        </tr>
+      {% endfor %}
+      </tbody>
+    </table>
+  </article>
+</section>
+{% endblock %}

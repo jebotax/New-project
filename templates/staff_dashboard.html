@@ -1,0 +1,60 @@
+{% extends "base.html" %}
+{% block title %}Dashboard{% endblock %}
+{% block content %}
+<section class="section-head">
+  <div>
+    <p class="eyebrow">{{ g.user['role']|title }} console</p>
+    <h1>Operations dashboard</h1>
+  </div>
+  <div class="button-row">
+    <a class="button-link" href="{{ url_for('manage_courses') }}">Courses</a>
+    <a class="button-link" href="{{ url_for('manage_batches') }}">Batches</a>
+    <a class="button-link" href="{{ url_for('manage_instructors') }}">Instructors</a>
+    {% if g.user['role'] == 'admin' %}
+      <a class="button-link" href="{{ url_for('manage_users') }}">Users</a>
+    {% endif %}
+    <a class="button-link" href="{{ url_for('reports') }}">Reports</a>
+  </div>
+</section>
+
+<section class="stats-grid">
+  <article class="stat-card"><span>Active courses</span><strong>{{ metrics['active_courses'] }}</strong></article>
+  <article class="stat-card"><span>Open batches</span><strong>{{ metrics['open_batches'] }}</strong></article>
+  <article class="stat-card"><span>Confirmed enrollments</span><strong>{{ metrics['confirmed_enrollments'] }}</strong></article>
+  <article class="stat-card"><span>Certificates issued</span><strong>{{ metrics['certificates_issued'] }}</strong></article>
+</section>
+
+<section class="split-grid">
+  <article class="table-card">
+    <h2>Upcoming class batches</h2>
+    <table>
+      <thead><tr><th>Course</th><th>Batch</th><th>Seats</th><th>Status</th></tr></thead>
+      <tbody>
+      {% for batch in batches %}
+        <tr>
+          <td>{{ batch['course_title'] }}</td>
+          <td>{{ batch['batch_code'] }}</td>
+          <td>{{ batch['seats_taken'] }}/{{ batch['seat_limit'] }}</td>
+          <td>{{ batch['status'] }}</td>
+        </tr>
+      {% endfor %}
+      </tbody>
+    </table>
+  </article>
+  <article class="table-card">
+    <h2>Recent enrollments</h2>
+    <table>
+      <thead><tr><th>Client</th><th>Course</th><th>Status</th></tr></thead>
+      <tbody>
+      {% for row in recent_enrollments %}
+        <tr>
+          <td>{{ row['full_name'] }}</td>
+          <td>{{ row['course_title'] }}</td>
+          <td>{{ row['status'] }} / {{ row['payment_status'] }} / {{ 'Eligible' if row['certificate_eligible'] else 'Pending' }}</td>
+        </tr>
+      {% endfor %}
+      </tbody>
+    </table>
+  </article>
+</section>
+{% endblock %}

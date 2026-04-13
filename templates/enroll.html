@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+{% block title %}Enroll{% endblock %}
+{% block content %}
+<section class="detail-header">
+  <div>
+    <p class="eyebrow">Enrollment form</p>
+    <h1>{{ batch['course_title'] }}</h1>
+    <p>{{ batch['batch_code'] }} | {{ batch['start_date'] }} to {{ batch['end_date'] }}</p>
+    <p>{{ batch['venue'] }}</p>
+  </div>
+  <div class="summary-card">
+    <p><strong>Fee:</strong> ${{ '%.2f'|format(batch['price_cents'] / 100) }}</p>
+    <p><strong>Seats:</strong> {{ batch['seats_taken'] }}/{{ batch['seat_limit'] }}</p>
+  </div>
+</section>
+
+<section class="form-card">
+  <form method="post" class="form-grid">
+    <label>Emergency contact name<input type="text" name="emergency_contact_name" required></label>
+    <label>Emergency contact phone<input type="text" name="emergency_contact_phone" required></label>
+    <label>Notes<textarea name="notes" rows="4" placeholder="Medical notes, dietary needs, or remarks"></textarea></label>
+    <button type="submit">Continue to payment</button>
+  </form>
+</section>
+{% endblock %}

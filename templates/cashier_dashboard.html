@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+{% block title %}Cashier Dashboard{% endblock %}
+{% block content %}
+<section class="section-head">
+  <div>
+    <p class="eyebrow">Cashier console</p>
+    <h1>Payment approvals</h1>
+  </div>
+</section>
+
+<section class="stats-grid">
+  <article class="stat-card"><span>Pending OTC</span><strong>{{ metrics['pending_otc'] }}</strong></article>
+  <article class="stat-card"><span>Approved OTC</span><strong>{{ metrics['approved_otc'] }}</strong></article>
+  <article class="stat-card"><span>GCash Paid</span><strong>{{ metrics['gcash_paid'] }}</strong></article>
+</section>
+
+<section class="table-card">
+  <h2>Over-the-counter payments</h2>
+  <table>
+    <thead><tr><th>Client</th><th>Course</th><th>Batch</th><th>Reference</th><th>Amount</th><th>Status</th><th></th></tr></thead>
+    <tbody>
+      {% for payment in payments %}
+        <tr>
+          <td>{{ payment['full_name'] }}</td>
+          <td>{{ payment['course_title'] }}</td>
+          <td>{{ payment['batch_code'] }}</td>
+          <td>{{ payment['provider_reference'] }}</td>
+          <td>${{ '%.2f'|format(payment['amount_cents'] / 100) }}</td>
+          <td>{{ payment['status'] }}</td>
+          <td>
+            {% if payment['status'] == 'pending' %}
+              <form method="post" action="{{ url_for('approve_otc_payment', payment_id=payment['id']) }}">
+                <button type="submit">Approve payment</button>
+              </form>
+            {% else %}
+              <span class="muted">Approved</span>
+            {% endif %}
+          </td>
+        </tr>
+      {% else %}
+        <tr><td colspan="7">No over-the-counter payments yet.</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</section>
+{% endblock %}

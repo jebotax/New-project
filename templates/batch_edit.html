@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+{% block title %}Edit Class Batch{% endblock %}
+{% block content %}
+<section class="form-card narrow">
+  <div class="section-head">
+    <div>
+      <p class="eyebrow">Schedule update</p>
+      <h1>Edit {{ batch['batch_code'] }}</h1>
+    </div>
+    <a href="{{ url_for('manage_batches') }}">Back to batches</a>
+  </div>
+  <form method="post" class="form-grid">
+    <label>Course
+      <select name="course_id" required>
+        {% for course in courses %}
+          <option value="{{ course['id'] }}" {% if course['id'] == batch['course_id'] %}selected{% endif %}>{{ course['title'] }}</option>
+        {% endfor %}
+      </select>
+    </label>
+    <label>Batch code<input type="text" name="batch_code" value="{{ batch['batch_code'] }}" required></label>
+    <label>Venue<input type="text" name="venue" value="{{ batch['venue'] }}" required></label>
+    <label>Start date<input type="date" name="start_date" value="{{ batch['start_date'] }}" required></label>
+    <label>End date<input type="date" name="end_date" value="{{ batch['end_date'] }}" required></label>
+    <label>Seat limit<input type="number" name="seat_limit" min="1" value="{{ batch['seat_limit'] }}" required></label>
+    <label>Status
+      <select name="status">
+        <option value="open" {% if batch['status'] == 'open' %}selected{% endif %}>Open</option>
+        <option value="draft" {% if batch['status'] == 'draft' %}selected{% endif %}>Draft</option>
+        <option value="closed" {% if batch['status'] == 'closed' %}selected{% endif %}>Closed</option>
+        <option value="completed" {% if batch['status'] == 'completed' %}selected{% endif %}>Completed</option>
+      </select>
+    </label>
+    <div class="button-row">
+      <button type="submit">Save batch</button>
+    </div>
+  </form>
+  <form method="post" action="{{ url_for('delete_batch', batch_id=batch['id']) }}">
+    <button type="submit" class="danger">Delete batch</button>
+  </form>
+</section>
+{% endblock %}

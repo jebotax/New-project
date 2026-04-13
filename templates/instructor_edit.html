@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+{% block title %}Edit Instructor{% endblock %}
+{% block content %}
+<section class="form-card narrow">
+  <div class="section-head">
+    <div>
+      <p class="eyebrow">Instructor update</p>
+      <h1>Edit {{ instructor['full_name'] }}</h1>
+    </div>
+    <a href="{{ url_for('manage_instructors') }}">Back to instructors</a>
+  </div>
+  <form method="post" class="form-grid">
+    <label>Full name<input type="text" name="full_name" value="{{ instructor['full_name'] }}" required></label>
+    <label>Email<input type="email" name="email" value="{{ instructor['email'] }}" required></label>
+    <label>Qualifications<textarea name="qualifications" rows="5" required>{{ instructor['qualifications'] }}</textarea></label>
+    <label>Status
+      <select name="is_active">
+        <option value="1" {% if instructor['is_active'] %}selected{% endif %}>Active</option>
+        <option value="0" {% if not instructor['is_active'] %}selected{% endif %}>Inactive</option>
+      </select>
+    </label>
+    <div class="button-row">
+      <button type="submit">Save instructor</button>
+    </div>
+  </form>
+  <form method="post" action="{{ url_for('delete_instructor', instructor_id=instructor['id']) }}">
+    <button type="submit" class="danger">Delete instructor</button>
+  </form>
+</section>
+{% endblock %}

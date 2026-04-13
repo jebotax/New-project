@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+{% block title %}Register{% endblock %}
+{% block content %}
+<section class="form-card narrow">
+  <h1>Create client account</h1>
+  <form method="post" class="form-grid">
+    <label>Full name<input type="text" name="full_name" required></label>
+    <label>Email<input type="email" name="email" required></label>
+    <label>Phone<input type="text" name="phone" required></label>
+    <label>Password<input type="password" name="password" minlength="6" required></label>
+    <button type="submit">Create account</button>
+  </form>
+</section>
+{% endblock %}

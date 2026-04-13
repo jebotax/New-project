@@ -1,0 +1,53 @@
+{% extends "base.html" %}
+{% block title %}Enrollment Review{% endblock %}
+{% block content %}
+<section class="detail-header">
+  <div>
+    <p class="eyebrow">Enrollment review</p>
+    <h1>{{ enrollment['full_name'] }}</h1>
+    <p>{{ enrollment['course_title'] }} | {{ enrollment['batch_code'] }}</p>
+    <p>{{ enrollment['email'] }}</p>
+  </div>
+  <div class="summary-card">
+    <p><strong>Payment:</strong> {{ enrollment['payment_status'] }}</p>
+    <p><strong>Attendance:</strong> {{ summary['present_sessions'] }}/{{ summary['total_sessions'] }}</p>
+    <p><strong>Batch finished:</strong> {{ 'Yes' if batch_finished else 'No' }}</p>
+    <p><strong>Perfect attendance:</strong> {{ 'Yes' if summary['perfect_attendance'] else 'No' }}</p>
+    <p><strong>Certificate:</strong> {{ enrollment['certificate_number'] or 'Not issued' }}</p>
+  </div>
+</section>
+
+<section class="table-card">
+  <h2>Attendance log</h2>
+  <table>
+    <thead><tr><th>Date</th><th>Status</th><th>Marked by client</th></tr></thead>
+    <tbody>
+      {% for record in records %}
+        <tr>
+          <td>{{ record['session_date'] }}</td>
+          <td>{{ record['status'] }}</td>
+          <td>{{ 'Yes' if record['marked_by_client'] else 'No' }}</td>
+        </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</section>
+
+<section class="form-card narrow">
+  <div class="section-head">
+    <div>
+      <p class="eyebrow">Certificate eligibility</p>
+      <h2>Approve certificate</h2>
+      <p>Certificates can be generated only after full attendance and a finished batch.</p>
+    </div>
+    <a href="{{ url_for('staff_enrollments') }}">Back to enrollments</a>
+  </div>
+  {% if enrollment['certificate_number'] %}
+    <p>Certificate already generated: <a href="{{ url_for('download_certificate', enrollment_id=enrollment['id']) }}">{{ enrollment['certificate_number'] }}</a></p>
+  {% else %}
+    <form method="post" action="{{ url_for('approve_certificate', enrollment_id=enrollment['id']) }}">
+      <button type="submit" {% if not can_issue %}disabled{% endif %}>Mark eligible and generate certificate</button>
+    </form>
+  {% endif %}
+</section>
+{% endblock %}

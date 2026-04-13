@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+{% block title %}{{ course['title'] }}{% endblock %}
+{% block content %}
+<section class="detail-header">
+  <div>
+    <p class="eyebrow">{{ course['code'] }}</p>
+    <h1>{{ course['title'] }}</h1>
+    <p>{{ course['description'] }}</p>
+    <p><strong>Prerequisites:</strong> {{ course['prerequisites'] or 'None' }}</p>
+  </div>
+  <div class="summary-card">
+    <p><strong>Price:</strong> ${{ '%.2f'|format(course['price_cents'] / 100) }}</p>
+    <p><strong>Duration:</strong> {{ course['duration_days'] }} days</p>
+  </div>
+</section>
+
+<section class="table-card">
+  <h2>Scheduled class batches</h2>
+  <table>
+    <thead>
+      <tr>
+        <th>Batch</th>
+        <th>Dates</th>
+        <th>Venue</th>
+        <th>Seats</th>
+        <th>Status</th>
+        <th></th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for batch in batches %}
+        <tr>
+          <td>{{ batch['batch_code'] }}</td>
+          <td>{{ batch['start_date'] }} to {{ batch['end_date'] }}</td>
+          <td>{{ batch['venue'] }}</td>
+          <td>{{ batch['seats_taken'] }}/{{ batch['seat_limit'] }}</td>
+          <td>{{ batch['status'] }}</td>
+          <td>
+            {% if g.user and g.user['role'] == 'client' and batch['status'] == 'open' and batch['seats_taken'] < batch['seat_limit'] %}
+              <a class="button-link" href="{{ url_for('enroll', batch_id=batch['id']) }}">Enroll</a>
+            {% elif not g.user %}
+              <a class="button-link" href="{{ url_for('home') }}">Login to enroll</a>
+            {% else %}
+              <span class="muted">Unavailable</span>
+            {% endif %}
+          </td>
+        </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</section>
+{% endblock %}

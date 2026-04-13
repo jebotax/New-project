@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+{% block title %}Edit Assignment{% endblock %}
+{% block content %}
+<section class="form-card narrow">
+  <div class="section-head">
+    <div>
+      <p class="eyebrow">Assignment update</p>
+      <h1>Edit instructor assignment</h1>
+    </div>
+    <a href="{{ url_for('manage_instructors') }}">Back to instructors</a>
+  </div>
+  <form method="post" class="form-grid">
+    <label>Instructor
+      <select name="instructor_id" required>
+        {% for instructor in instructors %}
+          <option value="{{ instructor['id'] }}" {% if instructor['id'] == assignment['instructor_id'] %}selected{% endif %}>{{ instructor['full_name'] }}</option>
+        {% endfor %}
+      </select>
+    </label>
+    <label>Class batch
+      <select name="class_batch_id" required>
+        {% for batch in batches %}
+          <option value="{{ batch['id'] }}" {% if batch['id'] == assignment['class_batch_id'] %}selected{% endif %}>{{ batch['course_title'] }} - {{ batch['batch_code'] }}</option>
+        {% endfor %}
+      </select>
+    </label>
+    <label>Role
+      <select name="role">
+        <option value="lead" {% if assignment['role'] == 'lead' %}selected{% endif %}>Lead</option>
+        <option value="support" {% if assignment['role'] == 'support' %}selected{% endif %}>Support</option>
+      </select>
+    </label>
+    <div class="button-row">
+      <button type="submit">Save assignment</button>
+    </div>
+  </form>
+  <form method="post" action="{{ url_for('delete_assignment', assignment_id=assignment['id']) }}">
+    <button type="submit" class="danger">Delete assignment</button>
+  </form>
+</section>
+{% endblock %}

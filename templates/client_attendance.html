@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+{% block title %}Attendance{% endblock %}
+{% block content %}
+<section class="form-card">
+  <div class="section-head">
+    <div>
+      <p class="eyebrow">Client attendance</p>
+      <h1>{{ enrollment['course_title'] }}</h1>
+      <p>{{ enrollment['batch_code'] }} | {{ enrollment['start_date'] }} to {{ enrollment['end_date'] }}</p>
+    </div>
+    <a href="{{ url_for('client_dashboard') }}">Back to dashboard</a>
+  </div>
+  <p><strong>Attendance:</strong> {{ summary['present_sessions'] }}/{{ summary['total_sessions'] }} sessions marked present.</p>
+  <form method="post" class="form-grid">
+    {% for record in records %}
+      <label class="attendance-row">
+        <span>{{ record['session_date'] }}</span>
+        {% if record['session_date'] <= today %}
+          <select name="attendance_{{ record['id'] }}">
+            <option value="present" {% if record['status'] == 'present' %}selected{% endif %}>Present</option>
+            <option value="absent" {% if record['status'] == 'absent' %}selected{% endif %}>Absent</option>
+          </select>
+        {% else %}
+          <span class="muted">Future session</span>
+        {% endif %}
+      </label>
+    {% endfor %}
+    <button type="submit">Save attendance</button>
+  </form>
+</section>
+{% endblock %}
