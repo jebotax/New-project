@@ -6,7 +6,8 @@
     <meta name="theme-color" content="#0d3b66">
     <title>{% block title %}Enrollment App{% endblock %}</title>
     <link rel="manifest" href="{{ url_for('manifest') }}">
-    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css', v=2) }}">
+    
   </head>
   <body>
     <header class="site-header">
@@ -26,7 +27,6 @@
           <a href="{{ url_for('logout') }}">Logout</a>
         {% else %}
           <a href="{{ url_for('home') }}">Welcome</a>
-          <a href="{{ url_for('login') }}">Login</a>
           <a class="button-link" href="{{ url_for('register') }}">Enroll Now</a>
         {% endif %}
       </nav>
