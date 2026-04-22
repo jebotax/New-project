@@ -1,8 +1,10 @@
 from __future__ import annotations
 
+import os
 import secrets
 from datetime import date, datetime, timedelta
 from functools import wraps
+from pathlib import Path
 
 from flask import (
     Flask,
@@ -19,7 +21,7 @@ from flask import (
 from werkzeug.security import check_password_hash, generate_password_hash
 
 from .certificates import build_certificate_pdf
-from .db import BASE_DIR, get_connection, initialize_database
+from .db import BASE_DIR, get_connection, get_instance_dir, initialize_database
 
 
 def hash_password(password: str) -> str:
@@ -28,12 +30,25 @@ def hash_password(password: str) -> str:
 
 def create_app() -> Flask:
     app = Flask(__name__, template_folder=str(BASE_DIR / "templates"), static_folder=str(BASE_DIR / "static"))
-    app.config["SECRET_KEY"] = "dev-secret-key"
-    app.config["CERTIFICATE_DIR"] = BASE_DIR / "instance" / "certificates"
-    app.config['SEND_FILE_MAX_AGE_DEFAULT'] = 0
+    app.config["SECRET_KEY"] = os.environ.get("APP_SECRET_KEY", "dev-secret-key")
+    app.config["ENV_NAME"] = os.environ.get("APP_ENV", "development").lower()
+    app.config["SEED_DEMO_DATA"] = os.environ.get(
+        "APP_SEED_DEMO_DATA",
+        "1" if app.config["ENV_NAME"] == "development" else "0",
+    ) == "1"
+    app.config["BOOTSTRAP_ADMIN_NAME"] = os.environ.get("APP_BOOTSTRAP_ADMIN_NAME", "Platform Admin")
+    app.config["BOOTSTRAP_ADMIN_EMAIL"] = os.environ.get("APP_BOOTSTRAP_ADMIN_EMAIL", "")
+    app.config["BOOTSTRAP_ADMIN_PASSWORD"] = os.environ.get("APP_BOOTSTRAP_ADMIN_PASSWORD", "")
+    certificate_dir = os.environ.get("APP_CERTIFICATE_DIR")
+    app.config["CERTIFICATE_DIR"] = (
+        Path(certificate_dir).expanduser()
+        if certificate_dir
+        else get_instance_dir() / "certificates"
+    )
+    app.config["SEND_FILE_MAX_AGE_DEFAULT"] = 0
 
     initialize_database()
-    seed_data()
+    seed_data(app)
 
     @app.before_request
     def load_current_user() -> None:
@@ -869,23 +884,29 @@ def target_dashboard(role: str) -> str:
     return url_for("staff_dashboard")
 
 
-def seed_data() -> None:
+def seed_data(app: Flask | None = None) -> None:
+    seed_demo_data = True if app is None else app.config["SEED_DEMO_DATA"]
+    bootstrap_admin_name = "Platform Admin" if app is None else app.config["BOOTSTRAP_ADMIN_NAME"]
+    bootstrap_admin_email = "" if app is None else app.config["BOOTSTRAP_ADMIN_EMAIL"]
+    bootstrap_admin_password = "" if app is None else app.config["BOOTSTRAP_ADMIN_PASSWORD"]
     with get_connection() as connection:
-        for user in [
-            ("Port Admin", "admin@maritimeenroll.test", hash_password("admin123"), "admin", "555-1000"),
-            ("Training Staff", "staff@maritimeenroll.test", hash_password("staff123"), "staff", "555-1001"),
-            ("Front Cashier", "cashier@maritimeenroll.test", hash_password("cashier123"), "cashier", "555-1003"),
-            ("Maria Santos", "client@maritimeenroll.test", hash_password("client123"), "client", "555-1002"),
-        ]:
-            connection.execute(
-                """
-                INSERT OR IGNORE INTO users (full_name, email, password_hash, role, phone)
-                VALUES (?, ?, ?, ?, ?)
-                """,
-                user,
-            )
+        if seed_demo_data:
+            for user in [
+                ("Port Admin", "admin@maritimeenroll.test", hash_password("admin123"), "admin", "555-1000"),
+                ("Training Staff", "staff@maritimeenroll.test", hash_password("staff123"), "staff", "555-1001"),
+                ("Front Cashier", "cashier@maritimeenroll.test", hash_password("cashier123"), "cashier", "555-1003"),
+                ("Maria Santos", "client@maritimeenroll.test", hash_password("client123"), "client", "555-1002"),
+            ]:
+                connection.execute(
+                    """
+                    INSERT OR IGNORE INTO users (full_name, email, password_hash, role, phone)
+                    VALUES (?, ?, ?, ?, ?)
+                    """,
+                    user,
+                )
+        ensure_bootstrap_admin(connection, bootstrap_admin_name, bootstrap_admin_email, bootstrap_admin_password)
         existing_courses = connection.execute("SELECT COUNT(*) AS count FROM courses").fetchone()
-        if existing_courses["count"] > 0:
+        if existing_courses["count"] > 0 or not seed_demo_data:
             connection.commit()
             return
         connection.executemany(
@@ -928,6 +949,29 @@ def seed_data() -> None:
             [(1, 1, "lead"), (2, 2, "lead"), (3, 1, "support")],
         )
         connection.commit()
+
+
+def ensure_bootstrap_admin(
+    connection,
+    admin_name: str,
+    admin_email: str,
+    admin_password: str,
+) -> None:
+    email = admin_email.strip().lower()
+    password = admin_password
+    if not email or not password:
+        return
+    connection.execute(
+        """
+        INSERT OR IGNORE INTO users (full_name, email, password_hash, role, phone)
+        VALUES (?, ?, ?, 'admin', '')
+        """,
+        (
+            admin_name.strip() or "Platform Admin",
+            email,
+            hash_password(password),
+        ),
+    )
 
 
 def get_batch_with_course(connection, batch_id: int):

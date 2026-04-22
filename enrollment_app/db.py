@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import os
 import sqlite3
 from pathlib import Path
 
@@ -7,6 +8,20 @@ from pathlib import Path
 BASE_DIR = Path(__file__).resolve().parent.parent
 INSTANCE_DIR = BASE_DIR / "instance"
 DB_PATH = INSTANCE_DIR / "enrollment_app.db"
+
+
+def get_instance_dir() -> Path:
+    if globals().get("INSTANCE_DIR") is not None:
+        return Path(globals()["INSTANCE_DIR"]).expanduser()
+    override = os.environ.get("APP_INSTANCE_DIR")
+    return Path(override).expanduser() if override else BASE_DIR / "instance"
+
+
+def get_db_path() -> Path:
+    if globals().get("DB_PATH") is not None:
+        return Path(globals()["DB_PATH"]).expanduser()
+    override = os.environ.get("APP_DATABASE_PATH")
+    return Path(override).expanduser() if override else get_instance_dir() / "enrollment_app.db"
 
 
 SCHEMA = """
@@ -117,8 +132,9 @@ CREATE TABLE IF NOT EXISTS certificates (
 
 
 def get_connection() -> sqlite3.Connection:
-    INSTANCE_DIR.mkdir(exist_ok=True)
-    connection = sqlite3.connect(DB_PATH)
+    db_path = get_db_path()
+    db_path.parent.mkdir(parents=True, exist_ok=True)
+    connection = sqlite3.connect(db_path)
     connection.row_factory = sqlite3.Row
     connection.execute("PRAGMA foreign_keys = ON;")
     return connection
